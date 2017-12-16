@@ -109,6 +109,14 @@ namespace SDDM {
         m_proxy = new GreeterProxy(socket);
         m_keyboard = new KeyboardModel();
 
+        m_sort_filterModel = new QSortFilterProxyModel();
+        m_sort_filterModel->setSourceModel(m_userModel);
+        m_sort_filterModel->setFilterRole(UserModel::NameRole);
+        m_sort_filterModel->setFilterRegExp(QStringLiteral("^"));
+        m_sort_filterModel->setSortRole(UserModel::NameRole);
+        m_sort_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+        m_sort_filterModel->sort(Qt::AscendingOrder);
+
         if(!testing && !m_proxy->isConnected()) {
             qCritical() << "Cannot connect to the daemon - is it running?";
             exit(EXIT_FAILURE);
@@ -183,6 +191,8 @@ namespace SDDM {
         view->rootContext()->setContextProperty(QStringLiteral("keyboard"), m_keyboard);
         view->rootContext()->setContextProperty(QStringLiteral("primaryScreen"), QGuiApplication::primaryScreen() == screen);
         view->rootContext()->setContextProperty(QStringLiteral("__sddm_errors"), QString());
+        view->rootContext()->setContextProperty(QStringLiteral("userSortModel"), m_sort_filterModel);
+        view->rootContext()->setContextProperty(QStringLiteral("applicationDirPath"), QGuiApplication::applicationDirPath());
 
         // get theme main script
         QString mainScript = QStringLiteral("%1/%2").arg(m_themePath).arg(m_metadata->mainScript());
